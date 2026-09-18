@@ -1,11 +1,97 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapid Fire Calculation</title>
+  <link href="./src/output.css" rel="stylesheet">
 </head>
-<body>
-    
+<body class="min-h-screen bg-linear-to-br from-indigo-950 via-slate-900 to-purple-950 text-white antialiased overflow-x-hidden">
+  <main class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
+    <section class="w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-indigo-950/50 backdrop-blur-sm p-6 sm:p-10">
+
+      <div id="gameScreen">
+        <header class="text-center mb-6">
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Rapid Fire</h1>
+          <p class="mt-1 text-sm text-slate-300">Solve as many math questions as you can before time runs out!</p>
+        </header>
+
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-semibold uppercase tracking-widest text-slate-300">Time left</span>
+            <span id="timerText" role="timer" aria-live="off" class="text-sm font-semibold tabular-nums text-amber-300">60s</span>
+          </div>
+          <div class="h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div id="timerBar" class="h-full rounded-full bg-amber-400 transition-all duration-1000 ease-linear" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
+          <div class="rounded-xl bg-white/5 border border-white/10 py-2.5 text-center">
+            <p id="statScore" class="text-xl font-extrabold tabular-nums text-amber-300">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Score</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-2.5 text-center">
+            <p id="statAttempted" class="text-xl font-extrabold tabular-nums">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Attempted</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-2.5 text-center">
+            <p id="statCorrect" class="text-xl font-extrabold tabular-nums text-emerald-400">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Correct</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-2.5 text-center">
+            <p id="statWrong" class="text-xl font-extrabold tabular-nums text-red-400">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Wrong</p>
+          </div>
+        </div>
+
+        <div class="mb-7 text-center">
+          <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">Question</p>
+          <p id="question" class="text-4xl sm:text-5xl md:text-6xl font-extrabold tabular-nums tracking-tight">1 + 1 =</p>
+        </div>
+
+        <form id="answerForm" class="flex flex-col sm:flex-row gap-3 mb-5">
+          <label for="answerInput" class="sr-only">Your answer</label>
+          <input id="answerInput" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="Your answer" class="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center text-2xl font-bold tabular-nums placeholder:font-normal placeholder:text-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40">
+          <button id="submitBtn" type="submit" class="rounded-xl bg-amber-400 px-7 py-3 text-lg font-bold text-slate-900 transition hover:bg-amber-300 active:scale-95 cursor-pointer">Submit</button>
+        </form>
+
+        <p id="feedback" aria-live="polite" class="min-h-6 text-center text-sm font-semibold text-slate-400"></p>
+      </div>
+
+      <div id="resultScreen" class="hidden text-center">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Time's Up!</h2>
+        <p class="mt-1 text-sm text-slate-300">Great effort. Here's how you did.</p>
+
+        <div class="mt-8">
+          <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Final score</p>
+          <p id="finalScore" class="text-6xl font-extrabold tabular-nums text-amber-300">0</p>
+        </div>
+
+        <div class="mt-7 grid grid-cols-2 gap-3">
+          <div class="rounded-xl bg-white/5 border border-white/10 py-3 text-center">
+            <p id="finalCorrect" class="text-2xl font-extrabold tabular-nums text-emerald-400">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Correct</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-3 text-center">
+            <p id="finalWrong" class="text-2xl font-extrabold tabular-nums text-red-400">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Wrong</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-3 text-center">
+            <p id="finalAttempted" class="text-2xl font-extrabold tabular-nums">0</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Attempted</p>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/10 py-3 text-center">
+            <p id="finalAccuracy" class="text-2xl font-extrabold tabular-nums">0%</p>
+            <p class="text-[11px] uppercase tracking-widest text-slate-400">Accuracy</p>
+          </div>
+        </div>
+
+        <button id="playAgainBtn" type="button" class="mt-8 w-full rounded-xl bg-amber-400 px-7 py-3 text-lg font-bold text-slate-900 transition hover:bg-amber-300 active:scale-95 cursor-pointer">Play Again</button>
+      </div>
+
+    </section>
+  </main>
+  <script src="./src/game.js"></script>
 </body>
 </html>

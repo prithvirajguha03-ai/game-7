@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@source "./index.html";
+@source "./src/game.js";
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
