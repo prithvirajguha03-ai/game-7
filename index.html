@@ -10,6 +10,61 @@
   <main class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
     <section class="w-full max-w-lg rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-indigo-950/50 backdrop-blur-sm p-6 sm:p-10">
 
+      <div id="difficultyScreen">
+
+        <header class="text-center mb-6">
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Choose Your Difficulty</h1>
+          <p class="mt-1 text-sm text-slate-300">Select how challenging you want today's activity to be.</p>
+        </header>
+
+        <div id="difficultyGroup" role="radiogroup" aria-label="Choose your difficulty level" class="flex flex-col gap-3 mb-7">
+          <button type="button" role="radio" aria-checked="false" data-difficulty="easy" aria-label="Easy - Relaxed pace and simpler challenges" class="difficulty-option w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left transition hover:border-amber-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 cursor-pointer">
+            <span class="flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-lg font-extrabold text-amber-300">E</span>
+                <span class="min-w-0">
+                  <span class="block text-lg font-bold">Easy</span>
+                  <span class="block text-sm text-slate-300">Relaxed pace and simpler challenges</span>
+                </span>
+              </span>
+              <span aria-hidden="true" class="difficulty-check flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400 text-base font-bold text-slate-900 opacity-0 scale-75 transition">&#10003;</span>
+            </span>
+          </button>
+
+          <button type="button" role="radio" aria-checked="false" data-difficulty="normal" aria-label="Normal - Balanced challenge" class="difficulty-option w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left transition hover:border-amber-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 cursor-pointer">
+            <span class="flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-lg font-extrabold text-amber-300">N</span>
+                <span class="min-w-0">
+                  <span class="block text-lg font-bold">Normal</span>
+                  <span class="block text-sm text-slate-300">Balanced challenge</span>
+                </span>
+              </span>
+              <span aria-hidden="true" class="difficulty-check flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400 text-base font-bold text-slate-900 opacity-0 scale-75 transition">&#10003;</span>
+            </span>
+          </button>
+
+          <button type="button" role="radio" aria-checked="false" data-difficulty="hard" aria-label="Hard - More challenging activity" class="difficulty-option w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left transition hover:border-amber-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 cursor-pointer">
+            <span class="flex items-center justify-between gap-3">
+              <span class="flex items-center gap-3 min-w-0">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-lg font-extrabold text-amber-300">H</span>
+                <span class="min-w-0">
+                  <span class="block text-lg font-bold">Hard</span>
+                  <span class="block text-sm text-slate-300">More challenging activity</span>
+                </span>
+              </span>
+              <span aria-hidden="true" class="difficulty-check flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-400 text-base font-bold text-slate-900 opacity-0 scale-75 transition">&#10003;</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <button id="startGameBtn" type="button" disabled class="w-full rounded-xl bg-amber-400 px-7 py-3 text-lg font-bold text-slate-900 transition enabled:hover:bg-amber-300 enabled:active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">Start Game</button>
+          <button id="backBtn" type="button" class="w-full rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 cursor-pointer">Back</button>
+        </div>
+
+      </div>
+
       <div id="gameScreen">
         <header class="text-center mb-6">
           <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Rapid Fire</h1>
@@ -62,6 +117,7 @@
       <div id="resultScreen" class="hidden text-center">
         <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Time's Up!</h2>
         <p class="mt-1 text-sm text-slate-300">Great effort. Here's how you did.</p>
+        <p id="finalDifficulty" class="mt-3 inline-block rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1 text-sm font-bold text-amber-300"></p>
 
         <div class="mt-8">
           <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Final score</p>
@@ -88,6 +144,7 @@
         </div>
 
         <button id="playAgainBtn" type="button" class="mt-8 w-full rounded-xl bg-amber-400 px-7 py-3 text-lg font-bold text-slate-900 transition hover:bg-amber-300 active:scale-95 cursor-pointer">Play Again</button>
+        <button id="changeDifficultyBtn" type="button" class="mt-3 w-full rounded-xl border border-white/15 bg-white/5 px-7 py-3 text-lg font-bold text-white transition hover:bg-white/10 active:scale-95 cursor-pointer">Change Difficulty</button>
       </div>
 
     </section>
