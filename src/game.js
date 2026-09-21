@@ -1,11 +1,48 @@
 (function () {
   'use strict';
 
-  var GAME_DURATION = 60;
+  var DIFFICULTY_LABELS = {
+    easy: 'Easy',
+    normal: 'Normal',
+    hard: 'Hard'
+  };
+
+  var DIFFICULTY_CONFIG = {
+    easy: {
+      duration: 90,
+      ops: ['add', 'sub'],
+      ranges: {
+        add: { aMin: 1, aMax: 25, bMin: 1, bMax: 25 },
+        sub: { aMin: 10, aMax: 50, bMin: 1, bMax: 9 }
+      }
+    },
+    normal: {
+      duration: 60,
+      ops: ['add', 'sub', 'mul', 'div'],
+      ranges: {
+        add: { aMin: 10, aMax: 99, bMin: 10, bMax: 99 },
+        sub: { aMin: 20, aMax: 99, bMin: 2, bMax: 19 },
+        mul: { aMin: 2, aMax: 12, bMin: 2, bMax: 12 },
+        div: { bMin: 2, bMax: 12, aMin: 1, aMax: 12 }
+      }
+    },
+    hard: {
+      duration: 45,
+      ops: ['add', 'sub', 'mul', 'div'],
+      ranges: {
+        add: { aMin: 100, aMax: 999, bMin: 100, bMax: 999 },
+        sub: { aMin: 100, aMax: 999, bMin: 50, bMax: 499 },
+        mul: { aMin: 4, aMax: 15, bMin: 4, bMax: 15 },
+        div: { bMin: 4, bMax: 15, aMin: 2, aMax: 15 }
+      }
+    }
+  };
 
   var state = {
     timerInterval: null,
-    timeLeft: GAME_DURATION,
+    timeLeft: DIFFICULTY_CONFIG.normal.duration,
+    duration: DIFFICULTY_CONFIG.normal.duration,
+    difficulty: null,
     score: 0,
     attempted: 0,
     correct: 0,
@@ -26,31 +63,36 @@
   }
 
   function generateQuestion() {
-    var op = randInt(0, 3);
-    var a, b, text, answer;
+    var cfg = DIFFICULTY_CONFIG[state.difficulty];
+    var op = cfg.ops[randInt(0, cfg.ops.length - 1)];
+    var r, a, b, text, answer;
 
     switch (op) {
-      case 0: // addition
-        a = randInt(10, 99);
-        b = randInt(10, 99);
+      case 'add':
+        r = cfg.ranges.add;
+        a = randInt(r.aMin, r.aMax);
+        b = randInt(r.bMin, r.bMax);
         text = a + ' + ' + b + ' =';
         answer = a + b;
         break;
-      case 1: // subtraction (result always positive)
-        a = randInt(20, 99);
-        b = randInt(2, 19);
+      case 'sub':
+        r = cfg.ranges.sub;
+        a = randInt(r.aMin, r.aMax);
+        b = randInt(r.bMin, r.bMax);
         text = a + ' \u2212 ' + b + ' =';
         answer = a - b;
         break;
-      case 2: // multiplication
-        a = randInt(2, 12);
-        b = randInt(2, 12);
+      case 'mul':
+        r = cfg.ranges.mul;
+        a = randInt(r.aMin, r.aMax);
+        b = randInt(r.bMin, r.bMax);
         text = a + ' \u00d7 ' + b + ' =';
         answer = a * b;
         break;
-      case 3: // division (always a whole number)
-        b = randInt(2, 12);
-        answer = randInt(1, 12);
+      case 'div':
+        r = cfg.ranges.div;
+        b = randInt(r.bMin, r.bMax);
+        answer = randInt(r.aMin, r.aMax);
         a = b * answer;
         text = a + ' \u00f7 ' + b + ' =';
         break;
@@ -78,12 +120,105 @@
     els.finalWrong = byId('finalWrong');
     els.finalAttempted = byId('finalAttempted');
     els.finalAccuracy = byId('finalAccuracy');
+    els.finalDifficulty = byId('finalDifficulty');
     els.playAgainBtn = byId('playAgainBtn');
+    els.changeDifficultyBtn = byId('changeDifficultyBtn');
+    els.difficultyScreen = byId('difficultyScreen');
+    els.difficultyGroup = byId('difficultyGroup');
+    els.difficultyOptions = Array.prototype.slice.call(els.difficultyGroup.querySelectorAll('[data-difficulty]'));
+    els.startGameBtn = byId('startGameBtn');
+    els.backBtn = byId('backBtn');
 
+    els.difficultyGroup.addEventListener('click', handleDifficultyClick);
+    els.difficultyGroup.addEventListener('keydown', handleDifficultyKeydown);
+    els.startGameBtn.addEventListener('click', startGame);
+    els.backBtn.addEventListener('click', handleBack);
     els.answerForm.addEventListener('submit', handleSubmit);
     els.playAgainBtn.addEventListener('click', startGame);
+    els.changeDifficultyBtn.addEventListener('click', function () {
+      showDifficultyScreen();
+    });
 
-    startGame();
+    showDifficultyScreen();
+  }
+
+  function handleBack() {
+    stopTimer();
+    window.history.back();
+  }
+
+  function handleDifficultyClick(event) {
+    var el = event.target && event.target.closest ? event.target.closest('[data-difficulty]') : null;
+    if (el) {
+      selectDifficulty(el.getAttribute('data-difficulty'));
+    }
+  }
+
+  function handleDifficultyKeydown(event) {
+    var key = event.key;
+    var n = els.difficultyOptions.length;
+    var idx = els.difficultyOptions.indexOf(document.activeElement);
+    var next = -1;
+
+    if (key === 'ArrowDown' || key === 'ArrowRight') {
+      next = idx < 0 ? 0 : (idx + 1) % n;
+    } else if (key === 'ArrowUp' || key === 'ArrowLeft') {
+      next = idx < 0 ? n - 1 : (idx - 1 + n) % n;
+    } else if (key === 'Home') {
+      next = 0;
+    } else if (key === 'End') {
+      next = n - 1;
+    }
+
+    if (next !== -1) {
+      event.preventDefault();
+      els.difficultyOptions[next].focus();
+      selectDifficulty(els.difficultyOptions[next].getAttribute('data-difficulty'));
+    }
+  }
+
+  function selectDifficulty(difficulty) {
+    state.difficulty = difficulty;
+    for (var i = 0; i < els.difficultyOptions.length; i++) {
+      var opt = els.difficultyOptions[i];
+      var selected = opt.getAttribute('data-difficulty') === difficulty;
+      opt.classList.toggle('border-amber-400', selected);
+      opt.classList.toggle('bg-amber-400/15', selected);
+      opt.classList.toggle('border-white/15', !selected);
+      opt.classList.toggle('bg-white/10', !selected);
+      opt.setAttribute('aria-checked', selected ? 'true' : 'false');
+      var check = opt.querySelector('.difficulty-check');
+      if (check) {
+        check.classList.toggle('opacity-100', selected);
+        check.classList.toggle('scale-100', selected);
+        check.classList.toggle('opacity-0', !selected);
+        check.classList.toggle('scale-75', !selected);
+      }
+    }
+    els.startGameBtn.disabled = false;
+  }
+
+  function showDifficultyScreen() {
+    stopTimer();
+    els.gameScreen.classList.add('hidden');
+    els.resultScreen.classList.add('hidden');
+    els.difficultyScreen.classList.remove('hidden');
+
+    if (state.difficulty) {
+      selectDifficulty(state.difficulty);
+    }
+    focusFirstSelectedOption();
+  }
+
+  function focusFirstSelectedOption() {
+    var target = els.difficultyOptions[0];
+    for (var i = 0; i < els.difficultyOptions.length; i++) {
+      if (els.difficultyOptions[i].getAttribute('data-difficulty') === state.difficulty) {
+        target = els.difficultyOptions[i];
+        break;
+      }
+    }
+    target.focus();
   }
 
   function stopTimer() {
@@ -94,8 +229,15 @@
   }
 
   function startGame() {
+    if (!DIFFICULTY_CONFIG[state.difficulty]) {
+      showDifficultyScreen();
+      return;
+    }
+
+    state.duration = DIFFICULTY_CONFIG[state.difficulty].duration;
+
     stopTimer();
-    state.timeLeft = GAME_DURATION;
+    state.timeLeft = state.duration;
     state.score = 0;
     state.attempted = 0;
     state.correct = 0;
@@ -103,8 +245,9 @@
     state.gameOver = false;
     state.submitting = false;
 
-    els.gameScreen.classList.remove('hidden');
+    els.difficultyScreen.classList.add('hidden');
     els.resultScreen.classList.add('hidden');
+    els.gameScreen.classList.remove('hidden');
     els.answerInput.disabled = false;
     els.submitBtn.disabled = false;
 
@@ -130,7 +273,7 @@
 
   function renderTimer() {
     var seconds = Math.max(state.timeLeft, 0);
-    var percent = (seconds / GAME_DURATION) * 100;
+    var percent = (seconds / state.duration) * 100;
     var low = seconds <= 10;
 
     els.timerText.textContent = seconds + 's';
@@ -237,6 +380,7 @@
     els.finalWrong.textContent = state.wrong;
     els.finalAttempted.textContent = state.attempted;
     els.finalAccuracy.textContent = accuracy + '%';
+    els.finalDifficulty.textContent = 'Difficulty: ' + (DIFFICULTY_LABELS[state.difficulty] || DIFFICULTY_LABELS.normal);
 
     els.playAgainBtn.focus();
   }
