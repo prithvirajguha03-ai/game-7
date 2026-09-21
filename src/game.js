@@ -136,7 +136,7 @@
     els.timerText.textContent = seconds + 's';
     els.timerBar.style.width = percent + '%';
     els.timerText.classList.toggle('text-red-400', low);
-    els.timerText.classList.toggle('text-amber-300', !low);
+    els.timerText.classList.toggle('text-amber-600', !low);
     els.timerBar.classList.toggle('bg-red-500', low);
     els.timerBar.classList.toggle('bg-amber-400', !low);
   }
@@ -160,13 +160,13 @@
 
   function setFeedback(msg, type) {
     els.feedback.textContent = msg;
-    els.feedback.classList.remove('text-emerald-400', 'text-red-400', 'text-amber-300', 'text-slate-400');
+    els.feedback.classList.remove('text-emerald-400', 'text-red-400', 'text-amber-600', 'text-slate-400');
     if (type === 'correct') {
       els.feedback.classList.add('text-emerald-400');
     } else if (type === 'wrong') {
       els.feedback.classList.add('text-red-400');
     } else if (type === 'info') {
-      els.feedback.classList.add('text-amber-300');
+      els.feedback.classList.add('text-amber-600');
     } else {
       els.feedback.classList.add('text-slate-400');
     }
